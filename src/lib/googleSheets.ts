@@ -16,9 +16,18 @@ import { mockClients } from '../data/mockClients';
 
 export type DataSource = 'mock' | 'sheets';
 
+/**
+ * ID del Google Sheet del CRM de la clínica (el de la URL que se compartió).
+ * Viene pre-configurado para que conectar sea inmediato: basta con poner
+ * VITE_DATA_SOURCE=sheets en el archivo .env. Se puede sobreescribir con
+ * VITE_GOOGLE_SHEET_ID si algún día se usa otra hoja.
+ */
+const DEFAULT_SHEET_ID = '10lwbPW2Uavxnz9-Qmg9m5Ycm7QFJQUX6XOs9iBrh43o';
+
 export function getDataSource(): DataSource {
   const source = import.meta.env.VITE_DATA_SOURCE;
-  if (source === 'sheets' && import.meta.env.VITE_GOOGLE_SHEET_ID) return 'sheets';
+  const hasCsvUrl = Boolean(import.meta.env.VITE_GOOGLE_SHEET_CSV_URL);
+  if (source === 'sheets' || hasCsvUrl) return 'sheets';
   return 'mock';
 }
 
@@ -43,19 +52,26 @@ export async function fetchClients(): Promise<RawClientRow[]> {
  *  Lectura real desde Google Sheets (sin librerías ni claves de API)
  * ------------------------------------------------------------------ *
  *
- *  Usamos el endpoint público "gviz" de Google, que devuelve la pestaña en
- *  formato CSV. Solo requiere que la hoja sea visible con el enlace
- *  ("Cualquiera con el enlace: Lector") o que esté publicada en la web.
+ *  Dos formas de leer la hoja, en orden de preferencia:
  *
- *      https://docs.google.com/spreadsheets/d/<ID>/gviz/tq?tqx=out:csv&sheet=<PESTAÑA>
+ *  A) URL de "Publicar en la web" en formato CSV (VITE_GOOGLE_SHEET_CSV_URL).
+ *     Es la más fiable desde el navegador (Google la sirve con CORS abierto).
+ *     Google Sheets → Archivo → Compartir → Publicar en la web → CSV.
+ *
+ *  B) Por ID de hoja, usando el endpoint público "gviz" (formato CSV). Requiere
+ *     que la hoja sea visible con el enlace ("Cualquiera con el enlace: Lector").
+ *
+ *         https://docs.google.com/spreadsheets/d/<ID>/gviz/tq?tqx=out:csv&sheet=<PESTAÑA>
  */
 async function fetchClientsFromGoogleSheets(): Promise<RawClientRow[]> {
-  const sheetId = import.meta.env.VITE_GOOGLE_SHEET_ID;
-  const sheetName = import.meta.env.VITE_GOOGLE_SHEET_NAME || 'Clientes';
+  const csvUrl = import.meta.env.VITE_GOOGLE_SHEET_CSV_URL;
+  const sheetId = import.meta.env.VITE_GOOGLE_SHEET_ID || DEFAULT_SHEET_ID;
+  const sheetName = import.meta.env.VITE_GOOGLE_SHEET_NAME; // vacío = primera pestaña
 
-  const url =
-    `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq` +
-    `?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+  const url = csvUrl
+    ? csvUrl
+    : `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv` +
+      (sheetName ? `&sheet=${encodeURIComponent(sheetName)}` : '');
 
   const response = await fetch(url);
   if (!response.ok) {

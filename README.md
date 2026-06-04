@@ -98,50 +98,56 @@ de terminar. La lógica está en `autoPreviousMonthKey()`
 
 ---
 
-## 🔌 Conectar con Google Sheets
+## 🔌 Conectar con tu Google Sheets (paso a paso)
 
-La conexión usa el endpoint público de Google (formato CSV), así que **no hace
-falta ninguna clave de API ni librería externa**.
+No hace falta ninguna clave de API ni librería externa. **El ID de tu hoja ya
+viene configurado** en el código, así que el proceso es muy corto.
 
-**1. Prepara la hoja**
+### 1. Comparte / publica la hoja
 
-- Abre tu Google Sheet del CRM.
-- Asegúrate de que la primera fila son las cabeceras
-  (`ID Cliente`, `Nombre`, `Fecha Alta`, `Estado`, `Fecha Baja`,
-  `Motivo Baja`, `Origen`).
-- Comparte la hoja: **Compartir → Acceso general → "Cualquier persona con el
-  enlace" → Lector**. (O bien `Archivo → Compartir → Publicar en la web`.)
+Elige **una** de estas dos opciones:
 
-**2. Copia el ID de la hoja**
+- **Opción A — Publicar en la web (recomendada, la más fiable desde el navegador):**
+  en tu Google Sheet → `Archivo` → `Compartir` → `Publicar en la web` → elige la
+  pestaña del CRM → formato **CSV** → `Publicar`. Copia la URL que te da.
 
-Está en la URL, entre `/d/` y `/edit`:
+- **Opción B — Compartir por enlace:** `Compartir` → `Acceso general` →
+  **"Cualquier persona con el enlace" → Lector**.
 
-```
-https://docs.google.com/spreadsheets/d/  ESTE_ES_EL_ID  /edit#gid=0
-```
+> Asegúrate de que la **primera fila** son las cabeceras: `ID Cliente`,
+> `Nombre`, `Fecha Alta`, `Estado`, `Fecha Baja`, `Motivo Baja`, `Origen`.
 
-**3. Crea el archivo `.env`**
-
-Copia `.env.example` a `.env` y rellénalo:
+### 2. Crea el archivo `.env`
 
 ```bash
 cp .env.example .env
 ```
 
+Y deja **una** de estas configuraciones:
+
 ```env
+# Opción A (pega la URL CSV de "Publicar en la web")
 VITE_DATA_SOURCE=sheets
-VITE_GOOGLE_SHEET_ID=PEGA_AQUI_EL_ID_DE_TU_HOJA
-VITE_GOOGLE_SHEET_NAME=Clientes
+VITE_GOOGLE_SHEET_CSV_URL=https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?output=csv
 ```
 
-(`VITE_GOOGLE_SHEET_NAME` es el nombre de la pestaña donde está el listado de
-clientes; por defecto `Clientes`.)
+```env
+# Opción B (por ID; el de tu CRM ya está puesto por defecto)
+VITE_DATA_SOURCE=sheets
+```
 
-**4. Reinicia el servidor** (`npm run dev`). El dashboard leerá directamente de
-tu hoja. El indicador de la barra lateral pasará a **"Google Sheets · en vivo"**.
+### 3. Reinicia el servidor
 
-> Si la conexión falla (hoja privada, sin internet…), el dashboard no se rompe:
-> avisa por consola y sigue mostrando los datos de demo.
+```bash
+npm run dev
+```
+
+El dashboard leerá directamente de tu hoja y el indicador de la barra lateral
+pasará a **"Google Sheets · en vivo"**. A partir de ahí, cada vez que añadas o
+edites un cliente en la hoja, el panel reflejará los cambios al recargar.
+
+> Si la conexión falla (hoja sin compartir, sin internet…), el dashboard no se
+> rompe: avisa por consola y sigue mostrando los datos de demo.
 
 El mapeo de columnas es tolerante con mayúsculas, tildes y espacios, y la lógica
 está en [`src/lib/googleSheets.ts`](src/lib/googleSheets.ts).
