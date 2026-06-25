@@ -131,7 +131,13 @@ function normalizar_(s) {
   return (s || '')
     .toString()
     .toUpperCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[ÁÀÄÂ]/g, 'A')
+    .replace(/[ÉÈËÊ]/g, 'E')
+    .replace(/[ÍÌÏÎ]/g, 'I')
+    .replace(/[ÓÒÖÔ]/g, 'O')
+    .replace(/[ÚÙÜÛ]/g, 'U')
+    .replace(/Ñ/g, 'N')
+    .replace(/Ç/g, 'C')
     .replace(/\s+/g, ' ')
     .trim();
 }
