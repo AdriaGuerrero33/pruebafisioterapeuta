@@ -43,9 +43,10 @@ var CONFIG = {
   // ID de la carpeta "PREMIUM CARS VERA" (pega el tuyo aquí):
   CARPETA_PREMIUMCARS_ID: 'PEGA_AQUI_EL_ID_DE_LA_CARPETA',
 
-  // Qué correos mirar. Por defecto: CUALQUIER correo con adjunto que no se haya
-  // procesado todavía. El cliente se decide luego por el nombre (asunto/cuerpo).
-  // ¿Solo quieres contratos? Añade al principio:  subject:(contrato OR firmado)
+  // Solo procesa correos ENVIADOS DESDE esta dirección (cambia REMITENTE si
+  // quieres otra), con adjunto y no procesados. El cliente se decide por el
+  // nombre detectado (asunto/cuerpo). Así solo entra "lo de los clientes".
+  REMITENTE: 'adriaguerrero314@gmail.com',
   CONSULTA: 'has:attachment ' +
             '-label:premiumcars-archivado -label:premiumcars-revisar newer_than:30d',
 
@@ -62,7 +63,8 @@ var CONFIG = {
 function archivarContratos() {
   var raiz = DriveApp.getFolderById(CONFIG.CARPETA_PREMIUMCARS_ID);
   var nombresCliente = listarNombresDeCarpetas_(raiz);   // ["WADRIA GUERRERO", ...]
-  var hilos = GmailApp.search(CONFIG.CONSULTA);
+  var consulta = 'from:' + CONFIG.REMITENTE + ' ' + CONFIG.CONSULTA;
+  var hilos = GmailApp.search(consulta);
 
   Logger.log('Correos a revisar: ' + hilos.length);
 
