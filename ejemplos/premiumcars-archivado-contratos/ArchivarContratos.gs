@@ -43,9 +43,10 @@ var CONFIG = {
   // ID de la carpeta "PREMIUM CARS VERA" (pega el tuyo aquí):
   CARPETA_PREMIUMCARS_ID: 'PEGA_AQUI_EL_ID_DE_LA_CARPETA',
 
-  // Qué correos mirar. Por defecto: que el asunto hable de "contrato" o
-  // "firmado", que traiga adjunto y que no se haya procesado todavía.
-  CONSULTA: 'subject:(contrato OR firmado) has:attachment ' +
+  // Qué correos mirar. Por defecto: CUALQUIER correo con adjunto que no se haya
+  // procesado todavía. El cliente se decide luego por el nombre (asunto/cuerpo).
+  // ¿Solo quieres contratos? Añade al principio:  subject:(contrato OR firmado)
+  CONSULTA: 'has:attachment ' +
             '-label:premiumcars-archivado -label:premiumcars-revisar newer_than:30d',
 
   // Etiquetas que pone Gmail para no repetir trabajo.
